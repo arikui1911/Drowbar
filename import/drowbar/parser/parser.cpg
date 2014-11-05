@@ -1,0 +1,116 @@
+%token FUNCTION IF ELSE ELSIF WHILE FOR RETURN BREAK CONTINUE NULL
+       LP RP LC RC SEMICOLON COMMA ASSIGN LOGICAL_AND LOGICAL_OR
+       EQ NE GT GE LT LE ADD SUB MUL DIV MOD TRUE FALSE GLOBAL
+       INT_LITERAL<Variant>
+       DOUBLE_LITERAL<Variant>
+       STRING_LITERAL<Variant>
+       IDENTIFIER<Variant>
+       ;
+
+translation_unit<Variant> : [doNothing] definition_or_statement
+                          | [doNothing] translation_unit definition_or_statement
+                          ;
+
+definition_or_statement<Variant> : [functionDefine] FUNCTION IDENTIFIER(0) LP parameter_list(2) RP block(1)
+                                 | [functionDefine] FUNCTION IDENTIFIER(0) LP RP block(1)
+                                 | [toplevelStatementAdd] statement(0)
+                                 ;
+
+parameter_list<Variant> : [parameterList] IDENTIFIER(0)
+                        | [parameterList] parameter_list(1) COMMA IDENTIFIER(0)
+                        ;
+
+statement<Variant> : [expressionStatement] expression(0) SEMICOLON
+                   | [globalStatement] GLOBAL identifier_list(0) SEMICOLON
+                   | [return1st] if_statement(0)
+                   | [whileStatement] WHILE LP expression(0) RP block(1)
+                   | [forStatement] FOR LP expression_opt(0) SEMICOLON expression_opt(1) SEMICOLON expression_opt(2) RP block(3)
+                   | [returnStatement] RETURN expression(0) SEMICOLON
+                   | [returnStatement] RETURN SEMICOLON
+                   | [breakStatement] BREAK SEMICOLON
+                   | [continueStatement] CONTINUE SEMICOLON
+                   ;
+
+if_statement<Variant> : [ifStatement] IF LP expression(0) RP block(1)
+                      | [ifStatement0elsif] IF LP expression(0) RP block(1) ELSE block(2)
+                      | [ifStatement] IF LP expression(0) RP block(1) elsif_list(2)
+                      | [ifStatement] IF LP expression(0) RP block(1) elsif_list(2) ELSE block(3)
+                      ;
+
+elsif_list<Variant> : [elsifList] elsif(0)
+                    | [elsifList] elsif_list(1) elsif(0)
+                    ;
+
+elsif<Variant> : [elsif] ELSIF LP expression(0) RP block(1)
+               ;
+
+block<Variant> : [block] LC statement_list(0) RC
+               | [block] LC RC
+               ;
+
+identifier_list<Variant> : [identifierList] IDENTIFIER(0)
+                         | [identifierList] identifier_list(1) COMMA IDENTIFIER(0)
+                         ;
+
+statement_list<Variant> : [statementList] statement(0)
+                        | [statementList] statement_list(1) statement(0)
+                        ;
+
+expression_opt<Variant> : [doNothing]
+                        | [return1st] expression(0)
+                        ;
+
+expression<Variant> : [return1st] logical_or_expression(0)
+                    | [assignExpression] IDENTIFIER(0) ASSIGN expression(1)
+                    ;
+
+logical_or_expression<Variant> : [return1st] logical_and_expression(0)
+                               | [binaryExpressionLogor] logical_or_expression(0) LOGICAL_OR logical_and_expression(1)
+                               ;
+
+logical_and_expression<Variant> : [return1st] equality_expression(0)
+                                | [binaryExpressionLogand] logical_and_expression(0) LOGICAL_AND equality_expression(1)
+                                ;
+
+equality_expression<Variant> : [return1st] relational_expression(0)
+                             | [binaryExpressionEq] equality_expression(0) EQ relational_expression(1)
+                             | [binaryExpressionNe] equality_expression(0) NE relational_expression(1)
+                             ;
+
+relational_expression<Variant> : [return1st] additive_expression(0)
+                               | [binaryExpressionGt] relational_expression(0) GT additive_expression(1)
+                               | [binaryExpressionGe] relational_expression(0) GE additive_expression(1)
+                               | [binaryExpressionLt] relational_expression(0) LT additive_expression(1)
+                               | [binaryExpressionLe] relational_expression(0) LE additive_expression(1)
+                               ;
+
+additive_expression<Variant> : [return1st] multiplicative_expression(0)
+                             | [binaryExpressionAdd] additive_expression(0) ADD multiplicative_expression(1)
+                             | [binaryExpressionSub] additive_expression(0) SUB multiplicative_expression(1)
+                             ;
+
+multiplicative_expression<Variant> : [return1st] unary_expression(0)
+                                   | [binaryExpressionMul] multiplicative_expression(0) MUL unary_expression(1)
+                                   | [binaryExpressionDiv] multiplicative_expression(0) DIV unary_expression(1)
+                                   | [binaryExpressionMod] multiplicative_expression(0) MOD unary_expression(1)
+                                   ;
+
+unary_expression<Variant> : [return1st] primary_expression(0)
+                          | [minusExpression] SUB unary_expression(0)
+                          ;
+
+primary_expression<Variant> : [return1st] LP expression(0) RP
+                            | [identifierExpression] IDENTIFIER(0)
+                            | [integerExpression] INT_LITERAL(0)
+                            | [doubleExpression] DOUBLE_LITERAL(0)
+                            | [stringExpression] STRING_LITERAL(0)
+                            | [booleanExpressionTrue] TRUE
+                            | [booleanExpressionFalse] FALSE
+                            | [nullExpression] NULL
+                            | [functionCallExpression] IDENTIFIER(0) LP argument_list(1) RP
+                            | [functionCallExpression] IDENTIFIER(0) LP RP
+                            ;
+
+argument_list<Variant> : [argumentList] expression(0)
+                       | [argumentList] argument_list(1) COMMA expression(0)
+                       ;

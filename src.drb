@@ -1,0 +1,12 @@
+print("Hello, world!" + 666 + "\n");
+
+f = fopen("temp.txt", "wt");
+fputs(f, "write test!");
+fputs(f, "write TEST!");
+fclose(f);
+
+
+print(100 + 200);
+print(100 + 200.5);
+print(-100);
+

@@ -1,0 +1,20 @@
+Drowbar -- crowbar written in D
+
+* SYNOPSIS
+
+  Crowbar is a programming language (http://kmaebashi.com/programmer/devlang/book/index.html).
+
+  Crowbar features:
+  - Written in C
+  - Orthodox procedural language
+  - Garbage collector (reference count -> mark and sweep)
+  - Execute script by interpreting AST
+
+  Drowbar is a clone of crowbar written in D, in order to learn D and caper.
+
+
+* License
+
+  Drowbar is public domain software.
+
+
